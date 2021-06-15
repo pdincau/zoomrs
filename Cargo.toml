@@ -1,0 +1,7 @@
+[package]
+name = "zoomrs"
+version = "0.1.0"
+authors = ["Daniele Fongo & Paolo D'Incau"]
+edition = "2018"
+
+[dependencies]
