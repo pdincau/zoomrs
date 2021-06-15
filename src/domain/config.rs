@@ -1,6 +1,9 @@
+use std::collections::hash_map::Entry::*;
 use std::collections::HashMap;
+
+use ZoomrsError::AlreadyAdded;
+
 use crate::domain::errors::ZoomrsError;
-use std::collections::hash_map::Entry;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
@@ -14,8 +17,8 @@ impl Config {
 
     pub fn add(&mut self, alias: String, url: String) -> Result<(), ZoomrsError> {
         match self.data.entry(alias.clone()) {
-            Entry::Occupied(_) => Err(ZoomrsError::AlreadyAdded(alias)),
-            Entry::Vacant(entry) => {
+            Occupied(_) => Err(AlreadyAdded(alias)),
+            Vacant(entry) => {
                 let _ = entry.insert(url);
                 Ok(())
             }
