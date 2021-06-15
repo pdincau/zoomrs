@@ -1,4 +1,5 @@
 mod config;
+mod errors;
 
 use crate::domain::config::Config;
 

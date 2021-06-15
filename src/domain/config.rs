@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use crate::domain::errors::ZoomrsError;
+use std::collections::hash_map::Entry;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
@@ -10,8 +12,14 @@ impl Config {
         self.data.get(&alias).map(|url| url.to_string())
     }
 
-    pub fn add(&mut self, alias: String, url: String) {
-        self.data.insert(alias, url);
+    pub fn add(&mut self, alias: String, url: String) -> Result<(), ZoomrsError> {
+        match self.data.entry(alias.clone()) {
+            Entry::Occupied(_) => Err(ZoomrsError::AlreadyAdded(alias)),
+            Entry::Vacant(entry) => {
+                let _ = entry.insert(url);
+                Ok(())
+            }
+        }
     }
 }
 
@@ -26,6 +34,7 @@ mod tests {
     use std::collections::HashMap;
 
     use crate::domain::*;
+    use crate::domain::errors::ZoomrsError;
 
     #[test]
     fn default_is_empty() {
@@ -41,5 +50,19 @@ mod tests {
         config.add("alias".to_string(), "url".to_string());
 
         assert_eq!(config.get("alias".to_string()), Some("url".to_string()));
+    }
+
+    #[test]
+    fn cannot_add_room_twice() {
+        let mut config = Config::default();
+
+        let _ = config.add("alias".to_string(), "url".to_string());
+
+        let result = config.add("alias".to_string(), "url".to_string());
+
+        match result {
+            Ok(_) => panic!("some room was added twice"),
+            Err(_) => ()
+        }
     }
 }
