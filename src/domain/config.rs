@@ -15,11 +15,11 @@ impl Config {
         self.data.get(&alias).map(|url| url.to_string())
     }
 
-    pub fn add(&mut self, alias: String, url: String) -> Result<(), ZoomrsError> {
-        match self.data.entry(alias.clone()) {
-            Occupied(_) => Err(AlreadyAdded(alias)),
+    pub fn add(&mut self, room: Room) -> Result<(), ZoomrsError> {
+        match self.data.entry(room.alias.clone()) {
+            Occupied(_) => Err(AlreadyAdded(room.alias)),
             Vacant(entry) => {
-                let _ = entry.insert(url);
+                let _ = entry.insert(room.url);
                 Ok(())
             }
         }
@@ -32,6 +32,11 @@ impl Config {
     }
 }
 
+pub struct Room {
+    pub alias: String,
+    pub url: String,
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
@@ -40,6 +45,7 @@ mod tests {
 
     use crate::domain::*;
     use crate::domain::errors::ZoomrsError;
+    use crate::domain::config::Room;
 
     #[test]
     fn default_is_empty() {
@@ -52,7 +58,9 @@ mod tests {
     fn can_add_room() {
         let mut config = Config::default();
 
-        config.add("alias".to_string(), "url".to_string());
+        let room = Room { alias: "alias".to_string(), url: "url".to_string() };
+
+        config.add(room);
 
         assert_eq!(config.get("alias".to_string()), Some("url".to_string()));
     }
@@ -61,10 +69,14 @@ mod tests {
     fn cannot_add_room_twice() {
         let mut config = Config::default();
 
-        let _ = config.add("alias".to_string(), "url".to_string());
+        let room = Room { alias: "alias".to_string(), url: "url".to_string() };
+        let the_same_room = Room { alias: "alias".to_string(), url: "url".to_string() };
 
-        let result = config.add("alias".to_string(), "url".to_string());
+        let _ = config.add(room);
+
+        let result = config.add(the_same_room);
 
         assert_err!(result);
     }
+
 }
