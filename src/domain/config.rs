@@ -36,6 +36,8 @@ impl Config {
 mod tests {
     use std::collections::HashMap;
 
+    use claim::assert_err;
+
     use crate::domain::*;
     use crate::domain::errors::ZoomrsError;
 
@@ -63,9 +65,6 @@ mod tests {
 
         let result = config.add("alias".to_string(), "url".to_string());
 
-        match result {
-            Ok(_) => panic!("some room was added twice"),
-            Err(_) => ()
-        }
+        assert_err!(result);
     }
 }
