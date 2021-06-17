@@ -7,7 +7,7 @@ use crate::domain::errors::ZoomrsError;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
-    data: HashMap<String, String>
+    data: HashMap<String, String>,
 }
 
 impl Config {
@@ -24,6 +24,16 @@ impl Config {
             }
         }
     }
+
+    pub fn search(&mut self, alias: String) -> Option<Room> {
+        match self.data.entry(alias.clone()) {
+            Occupied(entry) => Some(Room {
+                alias: entry.key().to_string(),
+                url: entry.get().to_string(),
+            }),
+            Vacant(entry) => None,
+        }
+    }
 }
 
 impl Config {
@@ -32,6 +42,7 @@ impl Config {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Room {
     pub alias: String,
     pub url: String,
@@ -43,9 +54,9 @@ mod tests {
 
     use claim::assert_err;
 
-    use crate::domain::*;
-    use crate::domain::errors::ZoomrsError;
     use crate::domain::config::Room;
+    use crate::domain::errors::ZoomrsError;
+    use crate::domain::*;
 
     #[test]
     fn default_is_empty() {
@@ -58,7 +69,10 @@ mod tests {
     fn can_add_room() {
         let mut config = Config::default();
 
-        let room = Room { alias: "alias".to_string(), url: "url".to_string() };
+        let room = Room {
+            alias: "alias".to_string(),
+            url: "url".to_string(),
+        };
 
         config.add(room);
 
@@ -69,8 +83,14 @@ mod tests {
     fn cannot_add_room_twice() {
         let mut config = Config::default();
 
-        let room = Room { alias: "alias".to_string(), url: "url".to_string() };
-        let the_same_room = Room { alias: "alias".to_string(), url: "url".to_string() };
+        let room = Room {
+            alias: "alias".to_string(),
+            url: "url".to_string(),
+        };
+        let the_same_room = Room {
+            alias: "alias".to_string(),
+            url: "url".to_string(),
+        };
 
         let _ = config.add(room);
 
@@ -79,4 +99,23 @@ mod tests {
         assert_err!(result);
     }
 
+    #[test]
+    fn can_search_room() {
+        let mut config = Config::default();
+
+        let room = Room {
+            alias: "alias".to_string(),
+            url: "url".to_string(),
+        };
+
+        let _ = config.add(room);
+
+        let expected_room = Room {
+            alias: "alias".to_string(),
+            url: "url".to_string(),
+        };
+
+        assert_eq!(None, config.search("not_existing".to_string()));
+        assert_eq!(Some(expected_room), config.search("alias".to_string()));
+    }
 }
