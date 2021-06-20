@@ -125,10 +125,7 @@ mod tests {
     fn can_delete_room() {
         let mut config = Config::default();
 
-        let room = Room {
-            alias: "alias".to_string(),
-            url: "url".to_string(),
-        };
+        let room = Room::new("alias", "url");
 
         let _ = config.add(room);
 
