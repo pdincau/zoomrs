@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use ZoomrsError::AlreadyAdded;
 
 use crate::domain::errors::ZoomrsError;
+use std::fmt::Error;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
@@ -29,6 +30,13 @@ impl Config {
         match self.data.entry(alias) {
             Occupied(entry) => Some(Room::new(entry.key(), entry.get())),
             Vacant(_) => None,
+        }
+    }
+
+    pub fn delete(&mut self, alias: String) -> Result<(), ZoomrsError> {
+        match self.data.remove(alias.as_str()) {
+            None => Err(ZoomrsError::NotPresent(alias)),
+            Some(_) => Ok(()),
         }
     }
 }
@@ -57,6 +65,7 @@ impl Room {
 #[cfg(test)]
 mod tests {
     use claim::assert_err;
+    use claim::assert_ok;
 
     use crate::domain::config::Room;
     use crate::domain::*;
@@ -103,5 +112,26 @@ mod tests {
 
         assert_eq!(None, config.search("not_existing".to_string()));
         assert_eq!(Some(expected_room), config.search("alias".to_string()));
+    }
+
+    #[test]
+    fn cannot_delete_missing_room() {
+        let mut config = Config::default();
+
+        assert_err!(config.delete("not_existing".to_string()));
+    }
+
+    #[test]
+    fn can_delete_room() {
+        let mut config = Config::default();
+
+        let room = Room {
+            alias: "alias".to_string(),
+            url: "url".to_string(),
+        };
+
+        let _ = config.add(room);
+
+        assert_ok!(config.delete("alias".to_string()));
     }
 }
