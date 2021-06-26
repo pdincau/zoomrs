@@ -69,21 +69,21 @@ cappuccino::tests!({
     use crate::domain::config::Room;
     use crate::domain::*;
 
-    before Config {
-        Config::default()
+    before {
+        let mut config = Config::default();
     }
 
-    it "is empty by default" |config: Config| {
+    it "is empty by default" {
         assert_eq!(config, Config::new());
     }
 
-    it "can add a room" |mut config: Config| {
+    it "can add a room" {
         let _ = config.add(Room::new("alias", "url"));
 
         assert_eq!(config.get("alias".to_string()), Some("url".to_string()));
     }
 
-    it "cannot add room twice" |mut config: Config| {
+    it "cannot add room twice" {
         let room = Room::new("alias", "url");
         let the_same_room = Room::new("alias", "url");
 
@@ -94,7 +94,7 @@ cappuccino::tests!({
         assert_err!(result);
     }
 
-    it "can search room" |mut config: Config| {
+    it "can search room" {
         let room = Room::new("alias", "url");
 
         let _ = config.add(room);
@@ -105,11 +105,11 @@ cappuccino::tests!({
         assert_eq!(Some(expected_room), config.search("alias".to_string()));
     }
 
-    it "cannot delete missing room" |mut config: Config| {
+    it "cannot delete missing room" {
         assert_err!(config.delete("not_existing".to_string()));
     }
 
-    it "can delete room" |mut config: Config| {
+    it "can delete room" {
         let room = Room::new("alias", "url");
 
         let _ = config.add(room);
