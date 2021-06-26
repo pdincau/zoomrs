@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use ZoomrsError::AlreadyAdded;
 
 use crate::domain::errors::ZoomrsError;
-use std::fmt::Error;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Config {
@@ -63,33 +62,28 @@ impl Room {
 }
 
 #[cfg(test)]
-mod tests {
+cappuccino::tests!({
     use claim::assert_err;
     use claim::assert_ok;
 
     use crate::domain::config::Room;
     use crate::domain::*;
 
-    #[test]
-    fn default_is_empty() {
-        let config = Config::default();
-
-        assert_eq!(config, Config::new())
+    before Config {
+        Config::default()
     }
 
-    #[test]
-    fn can_add_room() {
-        let mut config = Config::default();
+    it "is empty by default" |config: Config| {
+        assert_eq!(config, Config::new());
+    }
 
+    it "can add a room" |mut config: Config| {
         let _ = config.add(Room::new("alias", "url"));
 
         assert_eq!(config.get("alias".to_string()), Some("url".to_string()));
     }
 
-    #[test]
-    fn cannot_add_room_twice() {
-        let mut config = Config::default();
-
+    it "cannot add room twice" |mut config: Config| {
         let room = Room::new("alias", "url");
         let the_same_room = Room::new("alias", "url");
 
@@ -100,10 +94,7 @@ mod tests {
         assert_err!(result);
     }
 
-    #[test]
-    fn can_search_room() {
-        let mut config = Config::default();
-
+    it "can search room" |mut config: Config| {
         let room = Room::new("alias", "url");
 
         let _ = config.add(room);
@@ -114,21 +105,15 @@ mod tests {
         assert_eq!(Some(expected_room), config.search("alias".to_string()));
     }
 
-    #[test]
-    fn cannot_delete_missing_room() {
-        let mut config = Config::default();
-
+    it "cannot delete missing room" |mut config: Config| {
         assert_err!(config.delete("not_existing".to_string()));
     }
 
-    #[test]
-    fn can_delete_room() {
-        let mut config = Config::default();
-
+    it "can delete room" |mut config: Config| {
         let room = Room::new("alias", "url");
 
         let _ = config.add(room);
 
         assert_ok!(config.delete("alias".to_string()));
     }
-}
+});
