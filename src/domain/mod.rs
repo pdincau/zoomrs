@@ -1,4 +1,5 @@
-mod config;
+pub mod config;
+pub mod config_store;
 mod errors;
 
 use crate::domain::config::Config;

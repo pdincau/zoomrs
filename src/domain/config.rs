@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::hash_map::Entry::*;
 use std::collections::HashMap;
 
@@ -5,7 +6,7 @@ use ZoomrsError::AlreadyAdded;
 
 use crate::domain::errors::ZoomrsError;
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Config {
     data: HashMap<String, String>,
 }
@@ -53,7 +54,7 @@ pub struct Room {
 }
 
 impl Room {
-    fn new(alias: &str, url: &str) -> Room {
+    pub fn new(alias: &str, url: &str) -> Room {
         Room {
             alias: alias.to_string(),
             url: url.to_string(),
