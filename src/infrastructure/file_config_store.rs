@@ -4,17 +4,17 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-pub struct FileConfigStore {
-    file: String,
+pub struct FileConfigStore<'a> {
+    file: &'a str,
 }
 
-impl FileConfigStore {
-    pub fn new(file: String) -> Self {
+impl <'a> FileConfigStore <'a> {
+    pub fn new(file: &'a str) -> Self {
         Self { file }
     }
 }
 
-impl ConfigStore for FileConfigStore {
+impl <'a> ConfigStore for FileConfigStore <'a> {
     fn load(&self) -> Result<Config, ConfigStoreError> {
         let path = Path::new(&self.file);
 
@@ -47,7 +47,7 @@ cappuccino::tests!({
     use std::path::Path;
 
     it "fails to load the config when file does not exist" {
-        let config_store = FileConfigStore::new("/tmp/not-existing".to_string());
+        let config_store = FileConfigStore::new("/tmp/not-existing");
         assert_err!(config_store.load());
     }
 
@@ -55,14 +55,14 @@ cappuccino::tests!({
         let mut file = File::create(Path::new("/tmp/malformed-zoomrs-config"));
         file.unwrap().write_all("invalid".as_bytes());
 
-        let config_store = FileConfigStore::new("/tmp/malformed-zoomrs-config".to_string());
+        let config_store = FileConfigStore::new("/tmp/malformed-zoomrs-config");
         assert_err!(config_store.load());
     }
 
     it "saves and loads config from disk" {
         let mut config = Config::new();
         config.add(Room::new("alias", "url"));
-        let config_store = FileConfigStore::new("/tmp/zoomrs-config".to_string());
+        let config_store = FileConfigStore::new("/tmp/zoomrs-config");
 
         assert_ok!(config_store.save(&config));
         assert_eq!(config, config_store.load().unwrap());
